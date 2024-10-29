@@ -11,6 +11,7 @@ return {
         markdown = { 'markdownlint' },
         javascript = is_deno_project and { 'deno' } or { 'eslint' },
         typescript = is_deno_project and { 'deno' } or { 'eslint' },
+        python = { 'ruff' },
       }
 
       -- Create autocommand which carries out the actual linting

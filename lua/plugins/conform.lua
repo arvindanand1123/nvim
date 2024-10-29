@@ -30,20 +30,13 @@ return {
       end,
       formatters_by_ft = (function()
         local is_deno_project = vim.fn.filereadable 'deno.json' == 1 or vim.fn.filereadable 'deno.jsonc' == 1
-        local prettier_config = { 'prettierd', 'prettier', stop_after_first = true }
-        if is_deno_project then
-          return {
-            lua = { 'stylua' },
-            javascript = { 'deno' },
-            typescript = { 'deno' },
-          }
-        else
-          return {
-            lua = { 'stylua' },
-            javascript = prettier_config,
-            typescript = prettier_config,
-          }
-        end
+        local formatters = {
+          lua = { 'stylua' },
+          python = { 'ruff_fix', 'ruff_format' },
+          javascript = is_deno_project and { 'deno' } or { 'prettierd', 'prettier', stop_after_first = true },
+          typescript = is_deno_project and { 'deno' } or { 'prettierd', 'prettier', stop_after_first = true },
+        }
+        return formatters
       end)(),
     },
   },
