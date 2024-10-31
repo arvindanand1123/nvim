@@ -1,6 +1,4 @@
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
   pyright = {
     settings = {
       pyright = {
@@ -10,27 +8,12 @@ local servers = {
       python = {
         analysis = {
           typeCheckingMode = 'off',
-          ignore = { '*' },
         },
       },
     },
   },
-  tsserver = {
-    settings = {
-      separate_diagnostic_server = true,
-      tsserver_file_preferences = {
-        autoImportFileExcludePatterns = {
-          'antd',
-          'react-i18next',
-          'i18next',
-          'module',
-          'webpack',
-        },
-      },
-    },
-  },
-  -- rust_analyzer = {},
   denols = {},
+  ts_ls = {},
   lua_ls = {
     settings = {
       Lua = {
