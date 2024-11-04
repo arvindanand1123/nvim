@@ -70,6 +70,13 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Copy current file path to clipboard
+vim.keymap.set('n', '<leader>cp', function()
+  local filepath = vim.fn.expand '%:p'
+  vim.fn.setreg('+', filepath)
+  print('Copied file path: ' .. filepath)
+end, { desc = 'Copy current file [P]ath' })
+
 -- Map <Esc><Esc> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
