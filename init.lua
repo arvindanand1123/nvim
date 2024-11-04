@@ -7,6 +7,10 @@ vim.g.maplocalleader = ' '
 -- Set to true if using a Nerd Font
 vim.g.have_nerd_font = false
 
+-- Set spelling and lang to en_us
+vim.opt.spell = true
+vim.opt.spelllang = { 'en_us' }
+
 -- [[ Options ]]
 -- See `:help vim.opt` and `:help option-list`
 
