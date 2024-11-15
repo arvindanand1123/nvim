@@ -282,22 +282,6 @@ require('lazy').setup({
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
-          -- Function to organize imports
-          local organize_imports = function()
-            local params = vim.lsp.util.make_range_params()
-            params.context = { only = { 'source.organizeImports' } }
-            local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params, 1000)
-            for _, res in pairs(result or {}) do
-              for _, r in pairs(res.result or {}) do
-                if r.edit then
-                  vim.lsp.util.apply_workspace_edit(r.edit, 'utf-16')
-                else
-                  vim.lsp.buf.execute_command(r.command)
-                end
-              end
-            end
-          end
-
           map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
           map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
@@ -306,7 +290,6 @@ require('lazy').setup({
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
-          map('<leader>ci', organize_imports, 'Organize [I]mports')
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
           local client = vim.lsp.get_client_by_id(event.data.client_id)

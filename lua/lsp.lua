@@ -8,6 +8,7 @@ local servers = {
       python = {
         analysis = {
           typeCheckingMode = 'off',
+          autoImportCompletions = true,
         },
       },
     },
