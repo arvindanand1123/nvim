@@ -1,11 +1,9 @@
 local servers = {
-  pyright = {
+  basedpyright = {
     settings = {
-      pyright = {
+      basedpyright = {
         -- Use Ruff instead
         disableOrganizeImports = true,
-      },
-      python = {
         analysis = {
           typeCheckingMode = 'off',
         },
@@ -13,7 +11,6 @@ local servers = {
     },
   },
   denols = {},
-  ts_ls = {},
   lua_ls = {
     settings = {
       Lua = {
