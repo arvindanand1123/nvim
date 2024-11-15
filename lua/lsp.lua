@@ -1,9 +1,11 @@
 local servers = {
-  basedpyright = {
+  pyright = {
     settings = {
-      basedpyright = {
+      pyright = {
         -- Use Ruff instead
         disableOrganizeImports = true,
+      },
+      python = {
         analysis = {
           typeCheckingMode = 'off',
         },
@@ -11,13 +13,28 @@ local servers = {
     },
   },
   denols = {},
-  lua_ls = {
+  ts_ls = {
     settings = {
-      Lua = {
-        completion = {
-          callSnippet = 'Replace',
+      separate_diagnostic_server = true,
+      -- include_completions_with_insert_text = false,
+      tsserver_file_preferences = {
+        autoImportFileExcludePatterns = {
+          'antd',
+          'react-i18next',
+          'i18next',
+          'module',
+          'webpack',
         },
-        diagnostics = { disable = { 'missing-fields' } },
+      },
+    },
+    lua_ls = {
+      settings = {
+        Lua = {
+          completion = {
+            callSnippet = 'Replace',
+          },
+          diagnostics = { disable = { 'missing-fields' } },
+        },
       },
     },
   },

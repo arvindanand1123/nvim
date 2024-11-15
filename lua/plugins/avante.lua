@@ -9,7 +9,6 @@ return {
         model = 'gpt-4o',
       },
     },
-    build = ':AvanteBuild', -- This is optional, recommended tho. Also note that this will block the startup for a bit since we are compiling bindings in Rust.
     dependencies = {
       'stevearc/dressing.nvim',
       'nvim-lua/plenary.nvim',
