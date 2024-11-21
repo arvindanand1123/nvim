@@ -6,7 +6,7 @@ return {
     opts = {
       provider = 'openai',
       openai = {
-        model = 'o1-mini',
+        model = 'gpt-4o',
       },
     },
     dependencies = {
@@ -15,7 +15,6 @@ return {
       'MunifTanjim/nui.nvim',
       --- The below dependencies are optional,
       'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
-      'zbirenbaum/copilot.lua', -- for providers='copilot'
       {
         -- support for image pasting
         'HakonHarnes/img-clip.nvim',
