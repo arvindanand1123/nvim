@@ -6,7 +6,7 @@ return {
     opts = {
       provider = 'openai',
       openai = {
-        model = 'gpt-4o',
+        model = 'o1-mini',
       },
     },
     dependencies = {
