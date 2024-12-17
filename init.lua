@@ -436,7 +436,6 @@ require('lazy').setup({
     },
   },
 
-  -- Import plugins from `lua/custom/plugins/*.lua`
   { import = 'plugins' },
 }, {
   ui = {
@@ -457,6 +456,17 @@ require('lazy').setup({
     },
   },
 })
+
+-- Load the Vimscript plugin paths
+local vim_plugs = require 'plugins/custom/vim-plugs'
+
+-- Loop through the plugin paths and source each one
+for _, plugin_path in ipairs(vim_plugs) do
+  -- Should quietly fail
+  pcall(function()
+    vim.cmd('source ' .. plugin_path)
+  end)
+end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
