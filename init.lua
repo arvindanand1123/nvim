@@ -59,6 +59,27 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- Live substitution preview (inccommand)
 vim.opt.inccommand = 'split'
 
+-- Quick vertical split with leader v (since it's more common)
+vim.keymap.set('n', '<leader>v', ':vsplit<CR>', { desc = 'Create vertical split' })
+
+-- Horizontal split less prominent but still available with leader s
+vim.keymap.set('n', '<leader>s', ':split<CR>', { desc = 'Create horizontal split' })
+
+-- Easy way to close current split
+vim.keymap.set('n', '<leader>x', ':close<CR>', { desc = 'Close current split' })
+
+-- Quick split resizing using Alt/Meta + arrow keys (or hjkl if you prefer)
+vim.keymap.set('n', '<M-Left>', ':vertical resize -5<CR>', { desc = 'Decrease split width' })
+vim.keymap.set('n', '<M-Right>', ':vertical resize +5<CR>', { desc = 'Increase split width' })
+vim.keymap.set('n', '<M-Up>', ':resize +5<CR>', { desc = 'Increase split height' })
+vim.keymap.set('n', '<M-Down>', ':resize -5<CR>', { desc = 'Decrease split height' })
+
+-- Make current split full screen
+vim.keymap.set('n', '<leader>z', ':only<CR>', { desc = 'Zoom split (make full screen)' })
+
+-- Balance all splits
+vim.keymap.set('n', '<leader>=', '<C-w>=', { desc = 'Make splits equal size' })
+
 -- Highlight current line (cursorline)
 vim.opt.cursorline = true
 
@@ -90,11 +111,11 @@ vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
--- Navigate splits with <leader><hjkl>
-vim.keymap.set('n', '<leader>h', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<leader>l', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<leader>j', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<leader>k', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Remap Ctrl+hjkl for window navigation
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move focus to left window' })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move focus to lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move focus to upper window' })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move focus to right window' })
 
 -- [[ Autocommands ]]
 -- See `:help lua-guide-autocommands`
