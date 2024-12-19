@@ -59,20 +59,11 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- Live substitution preview (inccommand)
 vim.opt.inccommand = 'split'
 
--- Quick vertical split with leader v (since it's more common)
+-- Quick vertical split with leader v
 vim.keymap.set('n', '<leader>v', ':vsplit<CR>', { desc = 'Create vertical split' })
-
--- Horizontal split less prominent but still available with leader s
-vim.keymap.set('n', '<leader>s', ':split<CR>', { desc = 'Create horizontal split' })
 
 -- Easy way to close current split
 vim.keymap.set('n', '<leader>x', ':close<CR>', { desc = 'Close current split' })
-
--- Quick split resizing using Alt/Meta + arrow keys (or hjkl if you prefer)
-vim.keymap.set('n', '<M-Left>', ':vertical resize -5<CR>', { desc = 'Decrease split width' })
-vim.keymap.set('n', '<M-Right>', ':vertical resize +5<CR>', { desc = 'Increase split width' })
-vim.keymap.set('n', '<M-Up>', ':resize +5<CR>', { desc = 'Increase split height' })
-vim.keymap.set('n', '<M-Down>', ':resize -5<CR>', { desc = 'Decrease split height' })
 
 -- Make current split full screen
 vim.keymap.set('n', '<leader>z', ':only<CR>', { desc = 'Zoom split (make full screen)' })
