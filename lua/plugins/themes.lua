@@ -1,9 +1,9 @@
 return {
   {
-    'rafi/awesome-vim-colorschemes',
+    'ofirgall/ofirkai.nvim',
     priority = 1000,
     init = function()
-      vim.cmd 'colorscheme purify'
+      vim.cmd 'colorscheme ofirkai-darkblue'
     end,
   },
 }
