@@ -8,7 +8,6 @@ return {
       local is_deno_project = vim.fn.filereadable 'deno.json' == 1 or vim.fn.filereadable 'deno.jsonc' == 1
 
       lint.linters_by_ft = {
-        markdown = { 'markdownlint' },
         javascript = is_deno_project and { 'deno' } or { 'eslint' },
         typescript = is_deno_project and { 'deno' } or { 'eslint' },
         python = { 'ruff' },
