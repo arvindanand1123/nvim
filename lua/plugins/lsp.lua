@@ -24,6 +24,7 @@ local servers = {
       },
     },
   },
+  marksman = {},
 }
 
 if is_deno_project then
