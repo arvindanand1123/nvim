@@ -40,6 +40,7 @@ return {
         { '<leader>c', group = 'Code', mode = { 'n', 'x' } },
         { '<leader>d', group = 'Document' },
         { '<leader>a', group = 'Ai' },
+        { '<leader>l', group = 'Lazy' },
         { '<leader>r', group = 'Rename' },
         { '<leader>s', group = 'Search' },
         { '<leader>w', group = 'Workspace' },
