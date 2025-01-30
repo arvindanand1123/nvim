@@ -5,7 +5,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if using a Nerd Font
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- Set spelling and lang to en_us
 vim.opt.spell = true
@@ -96,21 +96,7 @@ require('lazy').setup({
   { import = 'plugins' },
 }, {
   ui = {
-    icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘',
-      config = '🛠',
-      event = '📅',
-      ft = '📂',
-      init = '⚙',
-      keys = '🗝',
-      plugin = '🔌',
-      runtime = '💻',
-      require = '🌙',
-      source = '📄',
-      start = '🚀',
-      task = '📌',
-      lazy = '💤 ',
-    },
+    icons = vim.g.have_nerd_font and {},
   },
 })
 
