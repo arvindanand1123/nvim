@@ -1,4 +1,5 @@
-default_n_lines = 500
+local default_n_lines = 500
+
 return {
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
