@@ -14,7 +14,7 @@ vim.keymap.set('n', '<leader>=', '<C-w>=', { desc = 'Make splits equal size' })
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic quickfix list' })
 
 -- Copy current file path to clipboard
 vim.keymap.set('n', '<leader>cp', function()
