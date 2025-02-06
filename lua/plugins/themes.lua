@@ -1,9 +1,12 @@
 return {
   {
-    'ofirgall/ofirkai.nvim',
+    'polirritmico/monokai-nightasty.nvim',
     priority = 1000,
     init = function()
-      vim.cmd 'colorscheme ofirkai-darkblue'
+      vim.cmd 'colorscheme monokai-nightasty'
     end,
+    opts = {
+      dark_style_background = 'transparent',
+    },
   },
 }
