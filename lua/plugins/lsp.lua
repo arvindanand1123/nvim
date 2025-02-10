@@ -15,6 +15,7 @@ local servers = {
       },
     },
   },
+  ts_ls = {},
   lua_ls = {
     settings = {
       Lua = {
@@ -27,12 +28,6 @@ local servers = {
   },
   marksman = {},
 }
-
-if is_deno_project then
-  servers.denols = {}
-else
-  servers.ts_ls = {}
-end
 
 return {
   {
