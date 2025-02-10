@@ -5,11 +5,10 @@ return {
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local lint = require 'lint'
-      local is_deno_project = vim.fn.filereadable 'deno.json' == 1 or vim.fn.filereadable 'deno.jsonc' == 1
 
       lint.linters_by_ft = {
-        javascript = is_deno_project and { 'deno' } or { 'eslint' },
-        typescript = is_deno_project and { 'deno' } or { 'eslint' },
+        javascript = { 'eslint' },
+        typescript = { 'eslint' },
         python = { 'ruff' },
       }
 

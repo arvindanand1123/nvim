@@ -29,12 +29,11 @@ return {
         }
       end,
       formatters_by_ft = (function()
-        local is_deno_project = vim.fn.filereadable 'deno.json' == 1 or vim.fn.filereadable 'deno.jsonc' == 1
         local formatters = {
           lua = { 'stylua' },
           python = { 'ruff_fix', 'ruff_format' },
-          javascript = is_deno_project and { 'deno' } or { 'prettierd', 'prettier', stop_after_first = true },
-          typescript = is_deno_project and { 'deno' } or { 'prettierd', 'prettier', stop_after_first = true },
+          javascript = { 'prettierd', 'prettier', stop_after_first = true },
+          typescript = { 'prettierd', 'prettier', stop_after_first = true },
         }
         return formatters
       end)(),

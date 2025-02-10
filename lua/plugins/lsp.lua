@@ -1,5 +1,3 @@
-local is_deno_project = vim.fn.filereadable 'deno.json' == 1 or vim.fn.filereadable 'deno.jsonc' == 1
-
 local servers = {
   pyright = {
     settings = {
