@@ -21,6 +21,9 @@ vim.opt.relativenumber = true
 -- Enable mouse mode (e.g., for resizing splits)
 vim.opt.mouse = 'a'
 
+-- Disable swap files
+vim.opt.swapfile = false
+
 -- Hide mode (already in status line)
 vim.opt.showmode = false
 
