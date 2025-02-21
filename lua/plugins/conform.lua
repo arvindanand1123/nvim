@@ -32,8 +32,8 @@ return {
         local formatters = {
           lua = { 'stylua' },
           python = { 'ruff_fix', 'ruff_format' },
-          javascript = { 'prettierd', 'prettier', stop_after_first = true },
-          typescript = { 'prettierd', 'prettier', stop_after_first = true },
+          javascript = { 'eslint_d', 'prettierd', 'prettier', stop_after_first = true },
+          typescript = { 'eslint_d', 'prettierd', 'prettier', stop_after_first = true },
         }
         return formatters
       end)(),
