@@ -31,7 +31,6 @@ return {
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = 'Search keymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = 'Search files' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = 'Search select telescope' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = 'Search current word' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = 'Search diagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Search resume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = 'Search recent files ("." for repeat)' })
