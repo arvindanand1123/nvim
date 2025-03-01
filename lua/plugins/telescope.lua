@@ -32,7 +32,6 @@ return {
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = 'Search files' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = 'Search select telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = 'Search current word' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Search by grep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = 'Search diagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Search resume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = 'Search recent files ("." for repeat)' })
@@ -55,6 +54,20 @@ return {
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = 'Search neovim files' })
+
+      vim.keymap.set('v', '<leader>sg', function()
+        local visual_selection = function()
+          local save_previous = vim.fn.getreg 'a'
+          local save_previous_type = vim.fn.getregtype 'a'
+          vim.cmd 'normal! "ay'
+          local selection = vim.fn.getreg 'a'
+          vim.fn.setreg('a', save_previous, save_previous_type)
+          return selection
+        end
+
+        local text = visual_selection()
+        builtin.live_grep { default_text = text }
+      end, { desc = 'Search by grep with visual selection' })
     end,
   },
 }
