@@ -7,7 +7,7 @@ return {
     provider = 'claude',
     claude = {
       endpoint = 'https://api.anthropic.com',
-      model = 'claude-3-7-sonnet-latest',
+      model = 'claude-3-5-sonnet-latest',
       temperature = 0,
       max_tokens = 4096,
     },
