@@ -34,7 +34,6 @@ return {
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Search by grep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = 'Search diagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Search resume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = 'Search recent files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = 'Find existing buffers' })
 
       vim.keymap.set('n', '<leader>/', function()
