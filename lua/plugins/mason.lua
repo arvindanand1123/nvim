@@ -13,6 +13,7 @@ local servers = {
       },
     },
   },
+  ruff = {},
   ts_ls = {},
   lua_ls = {
     settings = {
