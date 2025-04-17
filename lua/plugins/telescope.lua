@@ -69,7 +69,7 @@ return {
           vim.cmd 'normal! "ay'
           local selection = vim.fn.getreg 'a'
           vim.fn.setreg('a', save_previous, save_previous_type)
-          return selection
+          return selection:gsub("[\n\r]", " ")
         end
 
         local text = visual_selection()
