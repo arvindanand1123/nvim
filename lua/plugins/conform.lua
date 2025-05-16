@@ -13,6 +13,31 @@ return {
         desc = 'Format buffer',
       },
     },
+    config = function(_, opts)
+      local conform = require 'conform'
+      local tool_deps = require 'tool-dependencies'
+
+      -- Map tool names to formatter names that use the same binary
+      local tool_to_formatters = {
+        ruff = { 'ruff_fix', 'ruff_format' },
+        eslint_d = { 'eslint_d' },
+        stylua = { 'stylua' },
+      }
+
+      -- Configure formatters with custom paths if available
+      for tool_name, formatter_names in pairs(tool_to_formatters) do
+        local custom_path = tool_deps.get_binary_path(tool_name)
+        if custom_path then
+          for _, formatter_name in ipairs(formatter_names) do
+            if conform.formatters[formatter_name] then
+              conform.formatters[formatter_name].command = custom_path
+            end
+          end
+        end
+      end
+
+      conform.setup(opts)
+    end,
     opts = {
       notify_on_error = false,
       format_on_save = function(bufnr)
