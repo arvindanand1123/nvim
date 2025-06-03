@@ -83,7 +83,6 @@ M.tools = {
   },
 }
 
--- Check if a file exists and is executable
 local function is_executable(path)
   if not path then
     return false
@@ -98,9 +97,6 @@ local function is_executable(path)
   end
 end
 
----Get the effective binary path for a tool
----@param tool_name string The name of the tool
----@return string|nil The binary path if available and valid, nil to use Mason
 function M.get_binary_path(tool_name)
   local tool = M.tools[tool_name]
   if not tool then
@@ -114,9 +110,6 @@ function M.get_binary_path(tool_name)
   return nil
 end
 
----Get list of tools that should be managed by Mason
----Includes tools without a path or with an invalid path
----@return table List of tool names
 function M.get_mason_managed_tools()
   local mason_tools = {}
   for name, tool in pairs(M.tools) do
@@ -127,10 +120,6 @@ function M.get_mason_managed_tools()
   return mason_tools
 end
 
----Get tool configuration for a specific system
----@param tool_name string The name of the tool
----@param system string The system type ('lsp', 'lint', 'format')
----@return table Configuration for the specified system
 function M.get_tool_config(tool_name, system)
   local tool = M.tools[tool_name]
   if not tool then
@@ -145,9 +134,6 @@ function M.get_tool_config(tool_name, system)
   return config
 end
 
----Get all tools that provide a specific capability
----@param capability string The capability to check ('lsp', 'lint', 'format')
----@return table Table of tools with the specified capability
 function M.get_tools_by_capability(capability)
   local result = {}
   for name, tool in pairs(M.tools) do
