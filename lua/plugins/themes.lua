@@ -6,7 +6,7 @@ return {
       vim.cmd 'colorscheme monokai-nightasty'
     end,
     opts = {
-      dark_style_background = 'transparent',
+      dark_style_background = '#000000',
     },
   },
 }

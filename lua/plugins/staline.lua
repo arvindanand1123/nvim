@@ -3,9 +3,14 @@ return {
   config = function()
     require('staline').setup {
       sections = {
-        left = { '  ', 'mode', ' ', 'branch', ' ', 'lsp' },
+        left = { ' ', 'mode', ' ', 'branch', ' ', 'lsp' },
         mid = { 'file_name' },
         right = { 'line_column' },
+      },
+      inactive_sections = {
+        left = {},
+        mid = { 'file_name' },
+        right = {},
       },
       mode_colors = {
         i = '#FC9867',
@@ -18,7 +23,9 @@ return {
         full_path = true,
         line_column = ' [%l/%L] :%c  ',
         branch_symbol = ' ',
-        bg = '#121212',
+        bg = 'black',
+        inactive_color = 'white',
+        inactive_bgcolor = 'black',
       },
     }
   end,
