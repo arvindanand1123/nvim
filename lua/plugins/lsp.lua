@@ -72,11 +72,19 @@ return {
 
       local mason = require '/plugins/mason'
       local servers = mason.servers
+      local tool_deps = require 'tool-dependencies'
+
       require('mason-lspconfig').setup {
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+
+            local custom_path = tool_deps.get_binary_path(server_name)
+            if custom_path then
+              server.cmd = { custom_path }
+            end
+
             require('lspconfig')[server_name].setup(server)
           end,
         },

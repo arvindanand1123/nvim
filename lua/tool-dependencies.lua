@@ -113,7 +113,7 @@ end
 function M.get_mason_managed_tools()
   local mason_tools = {}
   for name, tool in pairs(M.tools) do
-    if not tool.path or not is_executable(tool.path) then
+    if not tool.path then
       table.insert(mason_tools, name)
     end
   end
