@@ -21,20 +21,13 @@ local M = {}
 -- path = nil or not set -- use Mason-managed version
 
 M.tools = {
-  pyright = {
+  basedpyright = {
     config = {
       lsp = {
-        settings = {
-          pyright = {
-            -- Use Ruff instead
-            disableOrganizeImports = true,
-          },
-          python = {
-            analysis = {
-              typeCheckingMode = 'off',
-              ignore = { '*' },
-            },
-          },
+        disableOrganizeImports = true, -- Disable organize imports feature (use Ruff instead)
+        analysis = {
+          typeCheckingMode = 'off',
+          ignore = { '*' }, -- Ignore all files for diagnostics (use Ruff for linting)
         },
       },
     },
@@ -120,15 +113,11 @@ function M.get_mason_managed_tools()
   return mason_tools
 end
 
-function M.get_tool_config(tool_name, system)
+function M.get_tool_config(tool_name, capability)
   local tool = M.tools[tool_name]
-  if not tool then
-    return {}
-  end
-
   local config = {}
-  if tool.config and tool.config[system] then
-    config = vim.deepcopy(tool.config[system])
+  if tool.config and tool.config[capability] then
+    config = vim.deepcopy(tool.config[capability])
   end
 
   return config
