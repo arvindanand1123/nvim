@@ -1,9 +1,7 @@
 local tool_deps = require 'tool-dependencies'
 
--- Create a servers table just for LSP configurations
 local servers = {}
 
--- Fill in server configurations from tools with LSP capability
 for name, tool in pairs(tool_deps.get_tools_by_capability 'lsp') do
   if tool.config and tool.config.lsp then
     servers[name] = vim.deepcopy(tool.config.lsp)
@@ -30,4 +28,5 @@ return {
     end,
   },
   servers = servers,
+  ensure_installed = ensure_installed,
 }

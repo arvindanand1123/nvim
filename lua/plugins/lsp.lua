@@ -12,7 +12,9 @@ return {
   {
     'neovim/nvim-lspconfig',
     dependencies = {
+      'williamboman/mason.nvim',
       'williamboman/mason-lspconfig.nvim',
+      'WhoIsSethDaniel/mason-tool-installer.nvim',
       { 'j-hui/fidget.nvim', opts = {} },
       'hrsh7th/cmp-nvim-lsp',
     },
@@ -72,23 +74,38 @@ return {
 
       local mason = require '/plugins/mason'
       local servers = mason.servers
+      local ensure_installed = mason.ensure_installed
       local tool_deps = require 'tool-dependencies'
 
+      local ensure_installed_servers = {}
+
+      for _, name in ipairs(ensure_installed) do
+        if servers[name] then
+          table.insert(ensure_installed_servers, name)
+        end
+      end
+
+      -- Keep auto config off so that we can build the custom one below
       require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-
-            local custom_path = tool_deps.get_binary_path(server_name)
-            if custom_path then
-              server.cmd = { custom_path }
-            end
-
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+        ensure_installed = ensure_installed_servers,
+        automatic_enable = false,
       }
+
+      for server_name, _ in pairs(servers) do
+        local server = {}
+        local lsp_settings = tool_deps.get_tool_config(server_name, 'lsp')
+        if lsp_settings then
+          server.settings = {
+            [server_name] = lsp_settings,
+          }
+        end
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        local custom_path = tool_deps.get_binary_path(server_name)
+        if custom_path then
+          server.cmd = { custom_path }
+        end
+        require('lspconfig')[server_name].setup(server)
+      end
     end,
   },
 }
