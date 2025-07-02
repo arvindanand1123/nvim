@@ -21,7 +21,10 @@ vim.keymap.set('n', '<leader>cp', function()
   local filepath = vim.fn.expand '%:p'
   vim.fn.setreg('+', filepath)
   print('Copied file path: ' .. filepath)
-end, { desc = 'Copy current file [P]ath' })
+end, { desc = 'Copy current file path' })
+
+-- Copy all text in current buffer
+vim.keymap.set('n', 'yfw', ':%y+<CR>', { noremap = true, silent = true })
 
 -- Map <Esc><Esc> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
