@@ -23,6 +23,7 @@ return {
               preview_height = 0.6,
             },
           },
+          path_display = { 'smart' },
         },
         extensions = {
           ['ui-select'] = {
@@ -69,7 +70,7 @@ return {
           vim.cmd 'normal! "ay'
           local selection = vim.fn.getreg 'a'
           vim.fn.setreg('a', save_previous, save_previous_type)
-          return selection:gsub("[\n\r]", " ")
+          return selection:gsub('[\n\r]', ' ')
         end
 
         local text = visual_selection()
