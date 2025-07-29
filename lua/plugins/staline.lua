@@ -3,8 +3,8 @@ return {
   config = function()
     require('staline').setup {
       sections = {
-        left = { ' ', 'mode', ' ', 'branch', ' ', 'lsp' },
-        mid = { 'file_name' },
+        left = { ' ', 'mode', ' ', 'file_name', ' ', 'lsp' },
+        mid = { 'branch' },
         right = { 'line_column' },
       },
       inactive_sections = {
