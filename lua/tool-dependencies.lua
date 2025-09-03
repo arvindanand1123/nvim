@@ -1,4 +1,3 @@
--- Tool dependencies configuration
 local M = {}
 
 -- Structure:
@@ -11,14 +10,6 @@ local M = {}
 --     }
 --   }
 --
--- Path resolution:
--- - If path is specified and exists: Use that exact binary
--- - If path doesn't exist or is not specified: Use Mason-managed version
---
--- Examples:
--- path = "/Users/username/.local/bin/ruff" -- use local installation
--- path = "ruff" -- use from PATH if available
--- path = nil or not set -- use Mason-managed version
 
 M.tools = {
   basedpyright = {
@@ -35,14 +26,28 @@ M.tools = {
   ruff = {
     path = '/Users/arvind/.virtualenvs/cinderblock/bin/ruff',
     config = {
-      lint = {},
-      format = {},
+      langs = { 'python' },
+      lint = {
+        commands = { 'ruff' },
+      },
+      format = {
+        commands = {
+          'ruff_fix',
+          'ruff_format',
+        },
+      },
     },
   },
   eslint_d = {
     config = {
-      lint = {},
-      format = {},
+      langs = { 'typescript', 'typescriptreact' },
+      lint = {
+
+        commands = { 'eslint_d' },
+      },
+      format = {
+        commands = { 'eslint_d' },
+      },
     },
   },
   ts_ls = {
@@ -52,7 +57,10 @@ M.tools = {
   },
   stylua = {
     config = {
-      format = {},
+      langs = { 'lua' },
+      format = {
+        commands = { 'stylua' },
+      },
     },
   },
   lua_ls = {
@@ -131,6 +139,48 @@ function M.get_tools_by_capability(capability)
     end
   end
   return result
+end
+
+local function bin_or(tool, default)
+  return M.get_binary_path(tool) or default
+end
+
+function M.get_formatters_to_command()
+  local formatters = M.get_tools_by_capability 'format'
+  local formatters_to_command = {}
+  for name, tool in pairs(formatters) do
+    local commands = tool.config.format.commands
+    for _, c in ipairs(commands) do
+      formatters_to_command[c] = { command = bin_or(name, name) }
+    end
+  end
+  return formatters_to_command
+end
+
+function M.get_lang_to_formatters()
+  local formatters = M.get_tools_by_capability 'format'
+  local lang_to_formatters = {}
+  for _, tool in pairs(formatters) do
+    local langs = tool.config.langs
+    local commands = tool.config.format.commands
+    for _, l in ipairs(langs) do
+      lang_to_formatters[l] = commands
+    end
+  end
+  return lang_to_formatters
+end
+
+function M.get_lang_to_linters()
+  local linters = M.get_tools_by_capability 'lint'
+  local lang_to_linters = {}
+  for _, tool in pairs(linters) do
+    local langs = tool.config.langs
+    local commands = tool.config.lint.commands
+    for _, l in ipairs(langs) do
+      lang_to_linters[l] = commands
+    end
+  end
+  return lang_to_linters
 end
 
 return M
