@@ -42,7 +42,6 @@ M.tools = {
     config = {
       langs = { 'typescript', 'typescriptreact' },
       lint = {
-
         commands = { 'eslint_d' },
       },
       format = {
@@ -85,30 +84,28 @@ M.tools = {
 }
 
 local function is_executable(path)
-  if not path then
-    return false
-  end
-
-  if path:find '/' then
-    local exists = vim.fn.filereadable(path) == 1
-    local is_exec = vim.fn.executable(path) == 1
-    return exists and is_exec
+  if path then
+    if path:find '/' then
+      local exists = vim.fn.filereadable(path) == 1
+      local is_exec = vim.fn.executable(path) == 1
+      return exists and is_exec
+    else
+      return vim.fn.executable(path) == 1
+    end
   else
-    return vim.fn.executable(path) == 1
+    return false
   end
 end
 
 function M.get_binary_path(tool_name)
   local tool = M.tools[tool_name]
-  if not tool then
+  if tool then
+    if tool.path and is_executable(tool.path) then
+      return tool.path
+    end
+  else
     return nil
   end
-
-  if tool.path and is_executable(tool.path) then
-    return tool.path
-  end
-
-  return nil
 end
 
 function M.get_mason_managed_tools()
