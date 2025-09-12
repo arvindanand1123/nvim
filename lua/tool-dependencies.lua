@@ -39,6 +39,7 @@ M.tools = {
     },
   },
   eslint_d = {
+    path = '/Users/arvind/Library/pnpm/eslint_d',
     config = {
       langs = { 'typescript', 'typescriptreact' },
       lint = {
