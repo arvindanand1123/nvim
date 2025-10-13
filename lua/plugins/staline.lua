@@ -3,7 +3,7 @@ return {
   config = function()
     require('staline').setup {
       sections = {
-        left = { ' ', 'mode', ' ', 'file_name', ' ', 'lsp' },
+        left = { 'file_name', ' ', 'lsp' },
         mid = { 'branch' },
         right = { 'line_column' },
       },
@@ -20,7 +20,6 @@ return {
       },
       defaults = {
         true_colors = true,
-        full_path = true,
         line_column = ' [%l/%L] :%c  ',
         branch_symbol = ' ',
         bg = 'black',

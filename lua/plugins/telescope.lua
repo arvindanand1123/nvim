@@ -23,7 +23,7 @@ return {
               preview_height = 0.6,
             },
           },
-          path_display = { 'smart' },
+          path_display = { 'filename_first' },
         },
         extensions = {
           ['ui-select'] = {
