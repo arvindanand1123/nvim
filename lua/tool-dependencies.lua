@@ -77,6 +77,15 @@ M.tools = {
       },
     },
   },
+  rust_analyzer = {
+    config = {
+      lsp = {
+        cargo = { allFeatures = true },
+        checkOnSave = { command = 'clippy' },
+        inlayHints = { enable = true },
+      },
+    },
+  },
   marksman = {
     config = {
       lsp = {},
