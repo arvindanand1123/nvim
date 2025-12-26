@@ -24,7 +24,7 @@ M.tools = {
     },
   },
   ruff = {
-    path = '/Users/arvind/.virtualenvs/cinderblock/bin/ruff',
+    path = '~/.virtualenvs/cinderblock/bin/ruff',
     config = {
       langs = { 'python' },
       lint = {
@@ -39,7 +39,7 @@ M.tools = {
     },
   },
   eslint_d = {
-    path = '/Users/arvind/Library/pnpm/eslint_d',
+    path = '~/Library/pnpm/eslint_d',
     config = {
       langs = { 'typescript', 'typescriptreact' },
       lint = {
@@ -51,6 +51,7 @@ M.tools = {
     },
   },
   ts_ls = {
+    langs = { 'typescript', 'typescriptreact' },
     config = {
       lsp = {},
     },
@@ -110,8 +111,9 @@ end
 function M.get_binary_path(tool_name)
   local tool = M.tools[tool_name]
   if tool then
-    if tool.path and is_executable(tool.path) then
-      return tool.path
+    local path = tool.path and vim.fn.expand(tool.path) or nil
+    if path and is_executable(path) then
+      return path
     end
   else
     return nil
