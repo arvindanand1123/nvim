@@ -50,6 +50,19 @@ M.tools = {
       },
     },
   },
+  deno = {
+    path = '~/.deno/bin/deno',
+    config = {
+      langs = { 'typescript' },
+      lsp = {},
+      lint = {
+        commands = { 'deno' },
+      },
+      format = {
+        commands = { 'deno' },
+      },
+    },
+  },
   ts_ls = {
     langs = { 'typescript', 'typescriptreact' },
     config = {
@@ -94,6 +107,50 @@ M.tools = {
   },
 }
 
+-- Define conditions for loading a particular tool
+-- Structure:
+--   toolname = function()
+--
+-- Access tool spec:
+-- If toolname has been defined,
+--  If load_condition then, return tool config
+--  Else, return Nil
+-- Else,
+--  return tool config
+--
+--
+--
+local function detect_project_type()
+  local util = require 'lspconfig.util'
+  fname = vim.api.nvim_buf_get_name(0)
+
+  local deno_root = util.root_pattern('deno.json', 'deno.jsonc')(fname)
+  local node_root = util.root_pattern('package.json', 'tsconfig.json', 'jsconfig.json')(fname)
+
+  if deno_root and node_root then
+    -- tie-break rule: prefer deno
+    return 'deno', deno_root
+  elseif deno_root then
+    return 'deno', deno_root
+  elseif node_root then
+    return 'node', node_root
+  else
+    return 'none', nil
+  end
+end
+
+M.load_conditions = {
+  deno = function()
+    return detect_project_type() == 'deno'
+  end,
+  ts_ls = function()
+    return detect_project_type() == 'node'
+  end,
+  eslint_d = function()
+    return detect_project_type() == 'node'
+  end,
+}
+
 local function is_executable(path)
   if path then
     if path:find '/' then
@@ -108,8 +165,26 @@ local function is_executable(path)
   end
 end
 
-function M.get_binary_path(tool_name)
+function M.get_tool(tool_name)
   local tool = M.tools[tool_name]
+  if not tool then
+    return nil
+  else
+    local condition = M.load_conditions[tool_name]
+    if condition then
+      if condition() then
+        return tool
+      else
+        return nil
+      end
+    else
+      return tool
+    end
+  end
+end
+
+function M.get_binary_path(tool_name)
+  local tool = M.get_tool(tool_name)
   if tool then
     local path = tool.path and vim.fn.expand(tool.path) or nil
     if path and is_executable(path) then
@@ -122,29 +197,36 @@ end
 
 function M.get_mason_managed_tools()
   local mason_tools = {}
-  for name, tool in pairs(M.tools) do
-    if not tool.path then
-      table.insert(mason_tools, name)
+  for name, _ in pairs(M.tools) do
+    local tool = M.get_tool(name)
+    if tool then
+      if not tool.path then
+        table.insert(mason_tools, name)
+      end
     end
   end
   return mason_tools
 end
 
 function M.get_tool_config(tool_name, capability)
-  local tool = M.tools[tool_name]
+  local tool = M.get_tool(tool_name)
   local config = {}
-  if tool.config and tool.config[capability] then
-    config = vim.deepcopy(tool.config[capability])
+  if tool then
+    if tool.config and tool.config[capability] then
+      config = vim.deepcopy(tool.config[capability])
+    end
   end
-
   return config
 end
 
 function M.get_tools_by_capability(capability)
   local result = {}
-  for name, tool in pairs(M.tools) do
-    if tool.config and tool.config[capability] then
-      result[name] = tool
+  for name, _ in pairs(M.tools) do
+    local tool = M.get_tool(name)
+    if tool then
+      if tool.config and tool.config[capability] then
+        result[name] = tool
+      end
     end
   end
   return result
