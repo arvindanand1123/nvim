@@ -27,9 +27,7 @@ M.tools = {
     path = '~/.virtualenvs/cinderblock/bin/ruff',
     config = {
       langs = { 'python' },
-      lint = {
-        commands = { 'ruff' },
-      },
+      lint = {},
       format = {
         commands = {
           'ruff_fix',
@@ -42,24 +40,23 @@ M.tools = {
     path = '~/Library/pnpm/eslint_d',
     config = {
       langs = { 'typescript', 'typescriptreact' },
-      lint = {
-        commands = { 'eslint_d' },
-      },
-      format = {
-        commands = { 'eslint_d' },
-      },
+      lint = {},
+      format = {},
+    },
+  },
+  denols = {
+    path = '~/.deno/bin/deno',
+    config = {
+      langs = { 'typescript' },
+      lsp = { commands = 'deno_lsp' },
     },
   },
   deno = {
     path = '~/.deno/bin/deno',
     config = {
       langs = { 'typescript' },
-      lsp = {},
-      lint = {
-        commands = { 'deno' },
-      },
       format = {
-        commands = { 'deno' },
+        commands = { 'deno_fmt' },
       },
     },
   },
@@ -72,9 +69,7 @@ M.tools = {
   stylua = {
     config = {
       langs = { 'lua' },
-      format = {
-        commands = { 'stylua' },
-      },
+      format = {},
     },
   },
   lua_ls = {
@@ -120,10 +115,10 @@ M.tools = {
 --
 --
 --
-local function detect_project_type()
-  local util = require 'lspconfig.util'
-  fname = vim.api.nvim_buf_get_name(0)
+local function detect_project_type_ts()
+  local fname = vim.fn.getcwd()
 
+  local util = require 'lspconfig.util'
   local deno_root = util.root_pattern('deno.json', 'deno.jsonc')(fname)
   local node_root = util.root_pattern('package.json', 'tsconfig.json', 'jsconfig.json')(fname)
 
@@ -141,13 +136,16 @@ end
 
 M.load_conditions = {
   deno = function()
-    return detect_project_type() == 'deno'
+    return detect_project_type_ts() == 'deno'
+  end,
+  denols = function()
+    return detect_project_type_ts() == 'deno'
   end,
   ts_ls = function()
-    return detect_project_type() == 'node'
+    return detect_project_type_ts() == 'node'
   end,
   eslint_d = function()
-    return detect_project_type() == 'node'
+    return detect_project_type_ts() == 'node'
   end,
 }
 
@@ -215,6 +213,16 @@ function M.get_tool_config(tool_name, capability)
     if tool.config and tool.config[capability] then
       config = vim.deepcopy(tool.config[capability])
     end
+    if capability == 'lsp' then
+      local bin_name
+      local bin_path = M.get_binary_path(tool_name)
+      if bin_path then
+        bin_name = bin_path
+      else
+        bin_name = tool_name
+      end
+      config.cmd = { bin_name, 'lsp' }
+    end
   end
   return config
 end
@@ -232,17 +240,13 @@ function M.get_tools_by_capability(capability)
   return result
 end
 
-local function bin_or(tool, default)
-  return M.get_binary_path(tool) or default
-end
-
 function M.get_formatters_to_command()
   local formatters = M.get_tools_by_capability 'format'
   local formatters_to_command = {}
   for name, tool in pairs(formatters) do
-    local commands = tool.config.format.commands
-    for _, c in ipairs(commands) do
-      formatters_to_command[c] = { command = bin_or(name, name) }
+    local commands = tool.config.format.commands or { name }
+    for _, command in ipairs(commands) do
+      formatters_to_command[command] = { command = M.get_binary_path(name) or name }
     end
   end
   return formatters_to_command
@@ -251,9 +255,9 @@ end
 function M.get_lang_to_formatters()
   local formatters = M.get_tools_by_capability 'format'
   local lang_to_formatters = {}
-  for _, tool in pairs(formatters) do
+  for name, tool in pairs(formatters) do
     local langs = tool.config.langs
-    local commands = tool.config.format.commands
+    local commands = tool.config.format.commands or { name }
     for _, l in ipairs(langs) do
       lang_to_formatters[l] = commands
     end
@@ -264,9 +268,9 @@ end
 function M.get_lang_to_linters()
   local linters = M.get_tools_by_capability 'lint'
   local lang_to_linters = {}
-  for _, tool in pairs(linters) do
+  for name, tool in pairs(linters) do
     local langs = tool.config.langs
-    local commands = tool.config.lint.commands
+    local commands = tool.config.format.commands or { name }
     for _, l in ipairs(langs) do
       lang_to_linters[l] = commands
     end
