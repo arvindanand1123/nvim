@@ -274,7 +274,7 @@ function M.get_lang_to_linters()
   local lang_to_linters = {}
   for name, tool in pairs(linters) do
     local langs = tool.config.langs
-    local commands = tool.config.format.commands or { name }
+    local commands = tool.config.lint.commands or { name }
     for _, l in ipairs(langs) do
       lang_to_linters[l] = commands
     end
