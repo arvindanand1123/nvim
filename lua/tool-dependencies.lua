@@ -2,11 +2,11 @@ local M = {}
 
 -- Structure:
 --   toolname = {
---     path = string|nil,      -- Optional. Custom binary path for the tool
---     config = {              -- Configuration organized by capability
---       lsp = {},            -- LSP server configuration
---       lint = {},           -- Linter configuration
---       format = {},         -- Formatter configuration
+--     path = string|nil,       -- Optional. Custom binary path for the tool
+--     config = {               -- Configuration organized by capability
+--       lsp = {},             -- LSP server configuration
+--       lint = {},            -- Linter configuration
+--       format = {},          -- Formatter configuration
 --     }
 --   }
 --
@@ -14,6 +14,7 @@ local M = {}
 M.tools = {
   basedpyright = {
     config = {
+      langs = { 'python' },
       lsp = {
         disableOrganizeImports = true, -- Disable organize imports feature (use Ruff instead)
         analysis = {
@@ -64,8 +65,8 @@ M.tools = {
     },
   },
   ts_ls = {
-    langs = { 'typescript', 'typescriptreact' },
     config = {
+      langs = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       lsp = {},
     },
   },
@@ -121,11 +122,9 @@ M.tools = {
 --
 --
 local function detect_project_type()
-  local util = require 'lspconfig.util'
-  fname = vim.api.nvim_buf_get_name(0)
-
-  local deno_root = util.root_pattern('deno.json', 'deno.jsonc')(fname)
-  local node_root = util.root_pattern('package.json', 'tsconfig.json', 'jsconfig.json')(fname)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local deno_root = vim.fs.root(bufnr, { 'deno.json', 'deno.jsonc' })
+  local node_root = vim.fs.root(bufnr, { 'package.json', 'tsconfig.json', 'jsconfig.json' })
 
   if deno_root and node_root then
     -- tie-break rule: prefer deno
@@ -197,11 +196,13 @@ end
 
 function M.get_mason_managed_tools()
   local mason_tools = {}
+  local lspconfig_to_package = require('mason-lspconfig').get_mappings().lspconfig_to_package
   for name, _ in pairs(M.tools) do
     local tool = M.get_tool(name)
     if tool then
       if not tool.path then
-        table.insert(mason_tools, name)
+        local mason_name = lspconfig_to_package[name] or name
+        table.insert(mason_tools, mason_name)
       end
     end
   end

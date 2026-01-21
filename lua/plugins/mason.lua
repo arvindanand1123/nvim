@@ -10,8 +10,6 @@ for name, tool in pairs(tool_deps.get_tools_by_capability 'lsp') do
   end
 end
 
-local ensure_installed = tool_deps.get_mason_managed_tools()
-
 return {
   {
     'williamboman/mason.nvim',
@@ -21,12 +19,13 @@ return {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     dependencies = {
       'williamboman/mason.nvim',
+      'williamboman/mason-lspconfig.nvim',
     },
     config = function()
       require('mason').setup()
+      local ensure_installed = tool_deps.get_mason_managed_tools()
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
     end,
   },
   servers = servers,
-  ensure_installed = ensure_installed,
 }

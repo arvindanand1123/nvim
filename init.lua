@@ -114,3 +114,6 @@ for _, plugin_path in ipairs(vim_plugs) do
     vim.cmd('source ' .. plugin_path)
   end)
 end
+
+-- [[ LSP Configuration ]]
+require 'lsp'
