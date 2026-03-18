@@ -3,7 +3,7 @@ return {
     'lewis6991/gitsigns.nvim',
     opts = {
       on_attach = function(bufnr)
-        local diff_main = require 'git_main_diff'
+        local diff_main = require 'git-main-diff'
         local gitsigns = require 'gitsigns'
 
         local function map(mode, l, r, opts)
@@ -17,8 +17,8 @@ return {
         end
 
         git_map('n', 'hb', gitsigns.blame_line, { desc = 'git blame line' })
-        git_map('n', 'hd', diff_main.worktree, { desc = 'git diff worktree against main' })
-        git_map('n', 'hD', diff_main.index, { desc = 'git diff staged changes against main' })
+        git_map('n', 'hw', diff_main.worktree, { desc = 'git diff worktree against main' })
+        git_map('n', 'hd', diff_main.index, { desc = 'git diff staged changes against main' })
         git_map('n', 'tb', gitsigns.toggle_current_line_blame, { desc = 'Toggle git show blame line' })
       end,
 
