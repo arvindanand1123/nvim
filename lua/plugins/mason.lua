@@ -1,0 +1,31 @@
+local tool_deps = require 'tool-dependencies'
+
+local servers = {}
+
+for name, tool in pairs(tool_deps.get_tools_by_capability 'lsp') do
+  if tool.config and tool.config.lsp then
+    servers[name] = vim.deepcopy(tool.config.lsp)
+  else
+    servers[name] = {}
+  end
+end
+
+return {
+  {
+    'williamboman/mason.nvim',
+    config = true,
+  },
+  {
+    'WhoIsSethDaniel/mason-tool-installer.nvim',
+    dependencies = {
+      'williamboman/mason.nvim',
+      'williamboman/mason-lspconfig.nvim',
+    },
+    config = function()
+      require('mason').setup()
+      local ensure_installed = tool_deps.get_mason_managed_tools()
+      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+    end,
+  },
+  servers = servers,
+}
