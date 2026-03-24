@@ -1,3 +1,66 @@
+local function collect_lsp_locations(results)
+  local locations = {}
+
+  for client_id, response in pairs(results or {}) do
+    local result = response.result
+    if result then
+      local client = vim.lsp.get_client_by_id(client_id)
+      local offset_encoding = client and client.offset_encoding or 'utf-16'
+
+      if vim.islist(result) then
+        for _, location in ipairs(result) do
+          locations[#locations + 1] = {
+            location = location,
+            offset_encoding = offset_encoding,
+          }
+        end
+      else
+        locations[#locations + 1] = {
+          location = result,
+          offset_encoding = offset_encoding,
+        }
+      end
+    end
+  end
+
+  return locations
+end
+
+local function reference_params(include_declaration)
+  return function()
+    local params = vim.lsp.util.make_position_params()
+    params.context = { includeDeclaration = include_declaration }
+    return params
+  end
+end
+
+local function fzf_or_jump(method, picker, opts, params_fn)
+  return function()
+    local params = params_fn and params_fn() or vim.lsp.util.make_position_params()
+
+    vim.lsp.buf_request_all(0, method, params, function(results)
+      local locations = collect_lsp_locations(results)
+
+      vim.schedule(function()
+        if #locations == 0 then
+          vim.notify('No locations found', vim.log.levels.INFO)
+          return
+        end
+
+        if #locations == 1 then
+          vim.lsp.util.show_document(locations[1].location, locations[1].offset_encoding, {
+            focus = true,
+            reuse_win = true,
+          })
+          return
+        end
+
+        require('fzf-lua')[picker](opts or {})
+      end)
+    end)
+  end
+end
+
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
   callback = function(event)
@@ -16,12 +79,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
       async_or_timeout = true,
     }
 
-    map('gd', fzf('lsp_definitions', lsp_locations), 'Goto definition')
-    map('gr', fzf('lsp_references', vim.tbl_extend('force', lsp_locations, {
+    map('gd', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_definition, 'lsp_definitions', lsp_locations), 'Goto definition')
+    map('gr', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_references, 'lsp_references', vim.tbl_extend('force', lsp_locations, {
       includeDeclaration = false,
-    })), 'Goto references')
-    map('gI', fzf('lsp_implementations', lsp_locations), 'Goto implementation')
-    map('<leader>D', fzf('lsp_typedefs', lsp_locations), 'Type definition')
+    }), reference_params(false)), 'Goto references')
+    map('gI', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_implementation, 'lsp_implementations', lsp_locations), 'Goto implementation')
+    map('<leader>D', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_typeDefinition, 'lsp_typedefs', lsp_locations), 'Type definition')
     map('<leader>ds', fzf('lsp_document_symbols', {
       async_or_timeout = true,
     }), 'Document symbols')
