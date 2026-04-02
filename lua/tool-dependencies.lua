@@ -40,7 +40,7 @@ M.tools = {
   eslint_d = {
     path = '~/Library/pnpm/eslint_d',
     config = {
-      langs = { 'typescript', 'typescriptreact' },
+      langs = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       lint = {},
       format = {},
     },
