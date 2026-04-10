@@ -7,19 +7,11 @@ return {
     lazy = false,
     build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter').setup {}
-
-      -- Install parsers
-      require('nvim-treesitter').install(parsers)
-
-      -- Enable treesitter highlighting and indentation for all filetypes
-      vim.api.nvim_create_autocmd('FileType', {
-        callback = function()
-          if pcall(vim.treesitter.start) then
-            vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-          end
-        end,
-      })
+      require('nvim-treesitter.configs').setup {
+        ensure_installed = parsers,
+        highlight = { enable = true },
+        indent = { enable = true },
+      }
     end,
   },
 }
