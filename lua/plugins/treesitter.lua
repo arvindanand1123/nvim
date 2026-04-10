@@ -1,17 +1,33 @@
-local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-
 return {
-  { -- Highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
     branch = 'main',
     lazy = false,
-    build = ':TSUpdate',
+    build = function()
+      require('nvim-treesitter').update()
+    end,
     config = function()
-      require('nvim-treesitter.configs').setup {
-        ensure_installed = parsers,
-        highlight = { enable = true },
-        indent = { enable = true },
+      require('nvim-treesitter').setup {}
+
+      local defaults = {
+        'lua',
+        'vim',
+        'vimdoc',
+        'query',
+        'python',
+        'javascript',
+        'typescript',
+        'tsx',
+        'rust',
       }
+
+      require('nvim-treesitter').install(defaults)
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          pcall(vim.treesitter.start, args.buf)
+        end,
+      })
     end,
   },
 }
