@@ -50,7 +50,6 @@ local function fzf_or_jump(method, picker, opts, params_fn)
         if #locations == 1 then
           vim.lsp.util.show_document(locations[1].location, locations[1].offset_encoding, {
             focus = true,
-            reuse_win = true,
           })
           return
         end
@@ -80,17 +79,34 @@ vim.api.nvim_create_autocmd('LspAttach', {
     }
 
     map('gd', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_definition, 'lsp_definitions', lsp_locations), 'Goto definition')
-    map('gr', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_references, 'lsp_references', vim.tbl_extend('force', lsp_locations, {
-      includeDeclaration = false,
-    }), reference_params(false)), 'Goto references')
+    map(
+      'gr',
+      fzf_or_jump(
+        vim.lsp.protocol.Methods.textDocument_references,
+        'lsp_references',
+        vim.tbl_extend('force', lsp_locations, {
+          includeDeclaration = false,
+        }),
+        reference_params(false)
+      ),
+      'Goto references'
+    )
     map('gI', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_implementation, 'lsp_implementations', lsp_locations), 'Goto implementation')
     map('<leader>D', fzf_or_jump(vim.lsp.protocol.Methods.textDocument_typeDefinition, 'lsp_typedefs', lsp_locations), 'Type definition')
-    map('<leader>ds', fzf('lsp_document_symbols', {
-      async_or_timeout = true,
-    }), 'Document symbols')
-    map('<leader>ws', fzf('lsp_live_workspace_symbols', {
-      async_or_timeout = true,
-    }), 'Workspace symbols')
+    map(
+      '<leader>ds',
+      fzf('lsp_document_symbols', {
+        async_or_timeout = true,
+      }),
+      'Document symbols'
+    )
+    map(
+      '<leader>ws',
+      fzf('lsp_live_workspace_symbols', {
+        async_or_timeout = true,
+      }),
+      'Workspace symbols'
+    )
     map('<leader>rn', vim.lsp.buf.rename, 'Rename')
     map('<leader>ca', vim.lsp.buf.code_action, 'Code action', { 'n', 'x' })
     map('gD', vim.lsp.buf.declaration, 'Goto declaration')
