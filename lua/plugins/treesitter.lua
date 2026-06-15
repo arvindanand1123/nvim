@@ -9,17 +9,10 @@ return {
     config = function()
       require('nvim-treesitter').setup {}
 
-      local defaults = {
-        'lua',
-        'vim',
-        'vimdoc',
-        'query',
-        'python',
-        'javascript',
-        'typescript',
-        'tsx',
-        'rust',
-      }
+      local tool_deps = require 'tool-dependencies'
+
+      local defaults = { 'vim', 'vimdoc', 'query', 'markdown_inline' }
+      vim.list_extend(defaults, tool_deps.get_langs { use_pure = false })
 
       require('nvim-treesitter').install(defaults)
 

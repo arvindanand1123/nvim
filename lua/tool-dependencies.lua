@@ -75,6 +75,7 @@ M.tools = {
   },
   lua_ls = {
     config = {
+      langs = { 'lua' },
       lsp = {
         settings = {
           Lua = {
@@ -89,6 +90,7 @@ M.tools = {
   },
   rust_analyzer = {
     config = {
+      langs = { 'rust' },
       lsp = {
         cargo = { allFeatures = true },
         checkOnSave = { command = 'clippy' },
@@ -98,6 +100,7 @@ M.tools = {
   },
   marksman = {
     config = {
+      langs = { 'markdown' },
       lsp = {},
     },
   },
@@ -268,11 +271,39 @@ function M.get_formatters_to_command()
   return formatters_to_command
 end
 
+function M.get_langs(opts)
+  opts = opts or {}
+  local use_pure = opts.use_pure ~= false
+
+  local names = opts.filter
+  if not names or #names == 0 then
+    names = {}
+    for name, _ in pairs(M.tools) do
+      table.insert(names, name)
+    end
+  end
+
+  local langs = {}
+  for _, name in ipairs(names) do
+    local tool = M.tools[name]
+    local tool_langs = tool and tool.config and tool.config.langs or {}
+    for _, ft in ipairs(tool_langs) do
+      local ft_to_parser = {
+        typescriptreact = 'tsx',
+        javascriptreact = 'javascript',
+      }
+      local lang = use_pure and ft or (ft_to_parser[ft] or ft)
+      langs[lang] = true
+    end
+  end
+  return vim.tbl_keys(langs)
+end
+
 function M.get_lang_to_formatters()
   local formatters = M.get_tools_by_capability 'format'
   local lang_to_formatters = {}
   for name, tool in pairs(formatters) do
-    local langs = tool.config.langs
+    local langs = M.get_langs { filter = { name } }
     local commands = tool.config.format.commands or { name }
     for _, l in ipairs(langs) do
       lang_to_formatters[l] = commands
@@ -285,7 +316,7 @@ function M.get_lang_to_linters()
   local linters = M.get_tools_by_capability 'lint'
   local lang_to_linters = {}
   for name, tool in pairs(linters) do
-    local langs = tool.config.langs
+    local langs = M.get_langs { filter = { name } }
     local commands = tool.config.lint.commands or { name }
     for _, l in ipairs(langs) do
       lang_to_linters[l] = commands
