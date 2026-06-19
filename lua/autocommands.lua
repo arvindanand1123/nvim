@@ -15,3 +15,11 @@ vim.api.nvim_create_autocmd('BufLeave', {
     vim.cmd 'silent! update'
   end,
 })
+
+-- Uses treesitter indent over default vim indent for python
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'python',
+  callback = function()
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
