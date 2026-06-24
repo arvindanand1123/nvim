@@ -151,12 +151,13 @@ local servers = mason.servers
 local tool_deps = require 'tool-dependencies'
 
 for server_name, _ in pairs(servers) do
-  local lspconfig_defaults = require('lspconfig.configs.' .. server_name).default_config
+  local lspconfig_defaults = vim.lsp.config[server_name]
 
   local config = {
     cmd = lspconfig_defaults.cmd,
     filetypes = lspconfig_defaults.filetypes,
     capabilities = capabilities,
+    root_dir = lspconfig_defaults.root_dir,
   }
 
   local lsp_settings = tool_deps.get_tool_config(server_name, 'lsp')
