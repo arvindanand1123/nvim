@@ -10,6 +10,58 @@ local M = {}
 --     }
 --   }
 --
+-- Any capability table (lsp/lint/format) may set `exclusion = function() return bool end`
+-- to conditionally opt that capability out for the tool. Evaluated in get_tools_by_capability,
+-- so callers (conform, nvim-lint, lspconfig setup, etc.) never see the excluded capability.
+--
+
+local function dir_has_prettier_config(dir)
+  local config_names = {
+    ['.prettierrc'] = true,
+    ['.prettierrc.json'] = true,
+    ['.prettierrc.yml'] = true,
+    ['.prettierrc.yaml'] = true,
+    ['.prettierrc.json5'] = true,
+    ['.prettierrc.js'] = true,
+    ['.prettierrc.cjs'] = true,
+    ['.prettierrc.mjs'] = true,
+    ['.prettierrc.ts'] = true,
+    ['prettier.config.js'] = true,
+    ['prettier.config.cjs'] = true,
+    ['prettier.config.mjs'] = true,
+    ['prettier.config.ts'] = true,
+  }
+  local skip_dirs = {
+    node_modules = true,
+    ['.git'] = true,
+  }
+
+  local uv = vim.uv or vim.loop
+  local handle = uv.fs_scandir(dir)
+  if not handle then
+    return false
+  end
+
+  local subdirs = {}
+  while true do
+    local name, entry_type = uv.fs_scandir_next(handle)
+    if not name then
+      break
+    end
+    if entry_type == 'file' and config_names[name] then
+      return true
+    elseif entry_type == 'directory' and not skip_dirs[name] then
+      table.insert(subdirs, dir .. '/' .. name)
+    end
+  end
+
+  for _, subdir in ipairs(subdirs) do
+    if dir_has_prettier_config(subdir) then
+      return true
+    end
+  end
+  return false
+end
 
 M.tools = {
   basedpyright = {
@@ -42,7 +94,11 @@ M.tools = {
     config = {
       langs = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       lint = {},
-      format = {},
+      format = {
+        exclusion = function()
+          return dir_has_prettier_config(vim.fn.getcwd())
+        end,
+      },
     },
   },
   denols = {
@@ -70,6 +126,12 @@ M.tools = {
   stylua = {
     config = {
       langs = { 'lua' },
+      format = {},
+    },
+  },
+  prettier = {
+    config = {
+      langs = { 'json', 'yaml', 'html', 'css', 'scss', 'markdown', 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       format = {},
     },
   },
@@ -101,6 +163,12 @@ M.tools = {
   marksman = {
     config = {
       langs = { 'markdown' },
+      lsp = {},
+    },
+  },
+  tailwindcss = {
+    config = {
+      langs = { 'html', 'css', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
       lsp = {},
     },
   },
@@ -251,8 +319,16 @@ function M.get_tools_by_capability(capability)
   for name, _ in pairs(M.tools) do
     local tool = M.get_tool(name)
     if tool then
-      if tool.config and tool.config[capability] then
-        result[name] = tool
+      local capability_config = tool.config and tool.config[capability]
+      if capability_config then
+        local exclusion = capability_config.exclusion
+        if exclusion == nil then
+          result[name] = tool
+        else
+          if not (exclusion()) then
+            result[name] = tool
+          end
+        end
       end
     end
   end
