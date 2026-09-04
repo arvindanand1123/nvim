@@ -2,7 +2,10 @@ local M = {}
 
 -- Structure:
 --   toolname = {
---     path = string|nil,       -- Optional. Custom binary path for the tool
+--     path = string|fun(): string|nil,
+--       string   -> fixed binary path; not Mason-managed
+--       function -> called once at setup, returns the binary path; not Mason-managed
+--       nil      -> Mason-managed, invoked by bare name
 --     config = {               -- Configuration organized by capability
 --       lsp = {},             -- LSP server configuration
 --       lint = {},            -- Linter configuration
@@ -15,52 +18,19 @@ local M = {}
 -- so callers (conform, nvim-lint, lspconfig setup, etc.) never see the excluded capability.
 --
 
-local function dir_has_prettier_config(dir)
-  local config_names = {
-    ['.prettierrc'] = true,
-    ['.prettierrc.json'] = true,
-    ['.prettierrc.yml'] = true,
-    ['.prettierrc.yaml'] = true,
-    ['.prettierrc.json5'] = true,
-    ['.prettierrc.js'] = true,
-    ['.prettierrc.cjs'] = true,
-    ['.prettierrc.mjs'] = true,
-    ['.prettierrc.ts'] = true,
-    ['prettier.config.js'] = true,
-    ['prettier.config.cjs'] = true,
-    ['prettier.config.mjs'] = true,
-    ['prettier.config.ts'] = true,
-  }
-  local skip_dirs = {
-    node_modules = true,
-    ['.git'] = true,
-  }
-
-  local uv = vim.uv or vim.loop
-  local handle = uv.fs_scandir(dir)
-  if not handle then
-    return false
-  end
-
-  local subdirs = {}
-  while true do
-    local name, entry_type = uv.fs_scandir_next(handle)
-    if not name then
-      break
+local function system(name)
+  return function()
+    local mason_bin = vim.fn.stdpath 'data' .. '/mason/bin'
+    for dir in (vim.env.PATH or ''):gmatch '[^:]+' do
+      if not vim.startswith(dir, mason_bin) then
+        local candidate = dir .. '/' .. name
+        if vim.fn.executable(candidate) == 1 then
+          return candidate
+        end
+      end
     end
-    if entry_type == 'file' and config_names[name] then
-      return true
-    elseif entry_type == 'directory' and not skip_dirs[name] then
-      table.insert(subdirs, dir .. '/' .. name)
-    end
+    return nil
   end
-
-  for _, subdir in ipairs(subdirs) do
-    if dir_has_prettier_config(subdir) then
-      return true
-    end
-  end
-  return false
 end
 
 M.tools = {
@@ -90,12 +60,59 @@ M.tools = {
     },
   },
   eslint_d = {
-    path = '~/Library/pnpm/eslint_d',
+    path = system 'eslint_d',
     config = {
       langs = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       lint = {},
       format = {
         exclusion = function()
+          local function dir_has_prettier_config(dir)
+            local config_names = {
+              ['.prettierrc'] = true,
+              ['.prettierrc.json'] = true,
+              ['.prettierrc.yml'] = true,
+              ['.prettierrc.yaml'] = true,
+              ['.prettierrc.json5'] = true,
+              ['.prettierrc.js'] = true,
+              ['.prettierrc.cjs'] = true,
+              ['.prettierrc.mjs'] = true,
+              ['.prettierrc.ts'] = true,
+              ['prettier.config.js'] = true,
+              ['prettier.config.cjs'] = true,
+              ['prettier.config.mjs'] = true,
+              ['prettier.config.ts'] = true,
+            }
+            local skip_dirs = {
+              node_modules = true,
+              ['.git'] = true,
+            }
+
+            local uv = vim.uv or vim.loop
+            local handle = uv.fs_scandir(dir)
+            if not handle then
+              return false
+            end
+
+            local subdirs = {}
+            while true do
+              local name, entry_type = uv.fs_scandir_next(handle)
+              if not name then
+                break
+              end
+              if entry_type == 'file' and config_names[name] then
+                return true
+              elseif entry_type == 'directory' and not skip_dirs[name] then
+                table.insert(subdirs, dir .. '/' .. name)
+              end
+            end
+
+            for _, subdir in ipairs(subdirs) do
+              if dir_has_prettier_config(subdir) then
+                return true
+              end
+            end
+            return false
+          end
           return dir_has_prettier_config(vim.fn.getcwd())
         end,
       },
@@ -130,8 +147,9 @@ M.tools = {
     },
   },
   prettier = {
+    path = system 'prettier',
     config = {
-      langs = { 'json', 'yaml', 'html', 'css', 'scss', 'markdown', 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+      langs = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       format = {},
     },
   },
@@ -266,16 +284,28 @@ function M.get_tool(tool_name)
   end
 end
 
+function M.resolve_path(tool_name)
+  local tool = M.tools[tool_name]
+  if not tool or tool.path == nil then
+    return nil, nil
+  end
+  local declared = tool.path
+  if type(declared) == 'function' then
+    declared = declared()
+  end
+  local path = declared and vim.fn.expand(declared) or nil
+  if path and is_executable(path) then
+    return path, declared
+  end
+  return nil, declared
+end
+
 function M.get_binary_path(tool_name)
-  local tool = M.get_tool(tool_name)
-  if tool then
-    local path = tool.path and vim.fn.expand(tool.path) or nil
-    if path and is_executable(path) then
-      return path
-    end
-  else
+  if not M.get_tool(tool_name) then
     return nil
   end
+  local path = M.resolve_path(tool_name)
+  return path
 end
 
 function M.get_mason_managed_tools()

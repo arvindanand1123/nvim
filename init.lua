@@ -117,3 +117,6 @@ end
 
 -- [[ LSP Configuration ]]
 require 'lsp'
+
+-- [[ :ToolInfo debug command ]]
+require 'tool-info'
