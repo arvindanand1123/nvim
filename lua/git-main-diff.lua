@@ -220,7 +220,21 @@ local function read_object(repo, object)
   return split_lines(stdout)
 end
 
+-- Wipe a stale scratch buffer left over from a previous diff. Without this,
+-- re-running a diff while the earlier tabs are still open fails with E95.
+local function wipe_existing(name)
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) then
+      if vim.api.nvim_buf_get_name(buf) == name then
+        pcall(vim.api.nvim_buf_delete, buf, { force = true })
+      end
+    end
+  end
+end
+
 local function scratch_buffer(name, lines, filetype)
+  wipe_existing(name)
+
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(buf, name)
   vim.bo[buf].buftype = 'nofile'
@@ -291,11 +305,14 @@ local function git_status_quickfix_items(repo)
   local items = {}
   for _, entry in ipairs(parsed_values) do
     if status_matches(entry.status) then
+      -- lnum/col must be >= 1 so the entry is `valid`; :cdo and :cfdo silently
+      -- skip invalid entries. Quickfix renders the filename itself, so `text`
+      -- only carries the status flag.
       table.insert(items, {
         col = 1,
         filename = vim.fs.normalize(repo .. '/' .. entry.path),
         lnum = 1,
-        text = entry.status .. ' ' .. entry.path,
+        text = entry.status,
       })
     end
   end
@@ -306,6 +323,12 @@ end
 local function open_file_buffer(win, context)
   if context.bufnr and context.bufnr > 0 and vim.api.nvim_buf_is_loaded(context.bufnr) then
     vim.api.nvim_win_set_buf(win, context.bufnr)
+    return
+  end
+
+  if not uv.fs_stat(context.path) then
+    local deleted = scratch_buffer('deleted://' .. context.relpath, {}, context.filetype)
+    vim.api.nvim_win_set_buf(win, deleted)
     return
   end
 
@@ -427,11 +450,20 @@ local function quickfix_contexts()
   return contexts, errors
 end
 
+local max_unprompted_diff_tabs = 10
+
 local function open_quickfix_diffs(kind)
   local contexts, errors = quickfix_contexts()
   if vim.tbl_isempty(contexts) then
     vim.notify(table.concat(errors, '\n'), vim.log.levels.ERROR)
     return
+  end
+
+  if #contexts > max_unprompted_diff_tabs then
+    local prompt = ('Open %d diff tabs?'):format(#contexts)
+    if vim.fn.confirm(prompt, '&Yes\n&No', 2) ~= 1 then
+      return
+    end
   end
 
   local opened = 0
