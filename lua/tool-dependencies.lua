@@ -202,6 +202,30 @@ M.tools = {
       },
     },
   },
+  gopls = {
+    config = {
+      langs = { 'go' },
+      lsp = {
+        analyses = {
+          unusedparams = true,
+        },
+        staticcheck = true,
+        gofumpt = true,
+      },
+    },
+  },
+  goimports = {
+    config = {
+      langs = { 'go' },
+      format = {},
+    },
+  },
+  gofumpt = {
+    config = {
+      langs = { 'go' },
+      format = {},
+    },
+  },
 }
 
 -- Define conditions for loading a particular tool
