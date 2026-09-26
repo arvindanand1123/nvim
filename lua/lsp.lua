@@ -156,14 +156,22 @@ for server_name, _ in pairs(servers) do
 
   local default_cmd = lspconfig_defaults.cmd
   local server_cmd
-  if not bin or not default_cmd then
+  if not bin then
     server_cmd = default_cmd
-  end
-  if type(default_cmd) == 'table' then
-    server_cmd = vim.list_extend({ bin }, vim.list_slice(default_cmd, 2))
   else
-    vim.notify(('lsp: %s declares path %s, but lspconfig builds its command in a function; using the default'):format(server_name, bin), vim.log.levels.WARN)
-    server_cmd = default_cmd
+    if not default_cmd then
+      server_cmd = default_cmd
+    else
+      if type(default_cmd) == 'table' then
+        server_cmd = vim.list_extend({ bin }, vim.list_slice(default_cmd, 2))
+      else
+        vim.notify(
+          ('lsp: ignoring path %s for %s. lspconfig starts %s with a function, so the binary cannot be swapped in; starting it with lspconfig\'s own command instead.'):format(bin, server_name, server_name),
+          vim.log.levels.WARN
+        )
+        server_cmd = default_cmd
+      end
+    end
   end
 
   local config = {
