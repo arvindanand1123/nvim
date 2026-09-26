@@ -350,22 +350,10 @@ end
 function M.get_tool_config(tool_name, capability)
   local tool = M.get_tool(tool_name)
   local config = {}
-  if tool then
-    if tool.config and tool.config[capability] then
-      config = vim.deepcopy(tool.config[capability])
-    end
-    if capability == 'lsp' then
-      local bin_name
-      local bin_path = M.get_binary_path(tool_name)
-      if bin_path then
-        bin_name = bin_path
-      else
-        bin_name = tool_name
-      end
-      config.cmd = { bin_name, 'lsp' }
-    end
+  if tool and tool.config and tool.config[capability] then
+    config = vim.deepcopy(tool.config[capability])
   end
-  return config
+  return config, M.get_binary_path(tool_name)
 end
 
 function M.get_tools_by_capability(capability)

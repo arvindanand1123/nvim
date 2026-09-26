@@ -152,15 +152,27 @@ local tool_deps = require 'tool-dependencies'
 
 for server_name, _ in pairs(servers) do
   local lspconfig_defaults = vim.lsp.config[server_name]
+  local lsp_settings, bin = tool_deps.get_tool_config(server_name, 'lsp')
+
+  local default_cmd = lspconfig_defaults.cmd
+  local server_cmd
+  if not bin or not default_cmd then
+    server_cmd = default_cmd
+  end
+  if type(default_cmd) == 'table' then
+    server_cmd = vim.list_extend({ bin }, vim.list_slice(default_cmd, 2))
+  else
+    vim.notify(('lsp: %s declares path %s, but lspconfig builds its command in a function; using the default'):format(server_name, bin), vim.log.levels.WARN)
+    server_cmd = default_cmd
+  end
 
   local config = {
-    cmd = lspconfig_defaults.cmd,
+    cmd = server_cmd,
     filetypes = lspconfig_defaults.filetypes,
     capabilities = capabilities,
     root_dir = lspconfig_defaults.root_dir,
   }
 
-  local lsp_settings = tool_deps.get_tool_config(server_name, 'lsp')
   if lsp_settings and next(lsp_settings) then
     if lsp_settings.init_options then
       config.init_options = vim.deepcopy(lsp_settings.init_options)
@@ -172,11 +184,6 @@ for server_name, _ in pairs(servers) do
         [server_name] = lsp_settings,
       }
     end
-  end
-
-  local custom_path = tool_deps.get_binary_path(server_name)
-  if custom_path and config.cmd then
-    config.cmd[1] = custom_path
   end
 
   vim.lsp.config(server_name, config)
