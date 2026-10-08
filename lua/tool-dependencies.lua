@@ -134,10 +134,27 @@ M.tools = {
       },
     },
   },
-  ts_ls = {
+  vtsls = {
     config = {
       langs = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
-      lsp = {},
+      lsp = {
+        settings = {
+          vtsls = {
+            -- replaces the need for `system`
+            autoUseWorkspaceTsdk = true,
+          },
+          typescript = {
+            -- A JS file outside any tsconfig (e.g. jest.config.js) gets an inferred project, and
+            -- automatic type acquisition loads typings for every package.json dependency into it.
+            -- In a large repo that exhausts tsserver's heap and it aborts.
+            disableAutomaticTypeAcquisition = true,
+            tsserver = {
+              -- 30% of system memory, in MB. vtsls defaults to 3072, too little for a large project.
+              maxTsServerMemory = math.floor(vim.uv.get_total_memory() * 0.3 / 1024 / 1024),
+            },
+          },
+        },
+      },
     },
   },
   stylua = {
@@ -268,7 +285,7 @@ M.load_conditions = {
   denols = function()
     return detect_project_type_ts() == 'deno'
   end,
-  ts_ls = function()
+  vtsls = function()
     return detect_project_type_ts() == 'node'
   end,
   eslint_d = function()

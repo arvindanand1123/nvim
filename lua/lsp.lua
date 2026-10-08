@@ -187,10 +187,22 @@ for server_name, _ in pairs(servers) do
       lsp_settings.init_options = nil
     end
 
+    -- `settings` is passed through as-is, for servers that read top-level sections (vtsls reads
+    -- `typescript` and `vtsls`). Everything else is nested under the server's name.
+    local settings
+    if lsp_settings.settings then
+      settings = vim.deepcopy(lsp_settings.settings)
+      lsp_settings.settings = nil
+    else
+      settings = {}
+    end
+
     if next(lsp_settings) then
-      config.settings = {
-        [server_name] = lsp_settings,
-      }
+      settings[server_name] = lsp_settings
+    end
+
+    if next(settings) then
+      config.settings = settings
     end
   end
 
