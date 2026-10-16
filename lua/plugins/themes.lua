@@ -22,6 +22,12 @@ return {
         colors.bg_menusel = ghostty.selection
         colors.border_highlight = colors.grey_dark
       end,
+      -- The theme colours added and deleted text green and magenta as well as
+      -- tinting the line, which drowns out syntax highlighting in diffs.
+      on_highlights = function(highlights)
+        highlights.DiffAdd.fg = nil
+        highlights.DiffDelete.fg = nil
+      end,
     },
   },
 }

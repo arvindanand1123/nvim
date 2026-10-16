@@ -1,65 +1,27 @@
+-- The remote's default branch (e.g. origin/main), for reviewing a branch
+-- against what it will merge into.
+local function default_branch()
+  local result = vim.system({ 'git', 'rev-parse', '--abbrev-ref', 'origin/HEAD' }, { text = true }):wait()
+  if result.code == 0 then
+    return vim.trim(result.stdout)
+  end
+  return 'main'
+end
+
 return {
   {
     'lewis6991/gitsigns.nvim',
-    init = function()
-      vim.api.nvim_create_user_command('GitQuickfixStatus', function()
-        require('git-main-diff').quickfix_status()
-      end, {
-        desc = 'populate quickfix with git modified and untracked files',
-      })
-
-      vim.api.nvim_create_user_command('GitQuickfixDiff', function()
-        require('git-main-diff').quickfix_worktree()
-      end, {
-        desc = 'git diff quickfix files against staged changes',
-      })
-
-      local function diff_quickfix_against_base(opts)
-        local diff_main = require 'git-main-diff'
-
-        if opts.args == 'worktree' then
-          diff_main.quickfix_worktree()
-        else
-          diff_main.quickfix_index()
-        end
-      end
-
-      vim.api.nvim_create_user_command('DiffBaseQuickfix', diff_quickfix_against_base, {
-        nargs = '?',
-        complete = function()
-          return { 'index', 'worktree' }
-        end,
-        desc = 'git diff quickfix files against the default branch',
-      })
-
-      vim.api.nvim_create_user_command('DiffMainQuickfix', diff_quickfix_against_base, {
-        nargs = '?',
-        complete = function()
-          return { 'index', 'worktree' }
-        end,
-        desc = 'git diff quickfix files against the default branch',
-      })
-    end,
     opts = {
       on_attach = function(bufnr)
-        local diff_main = require 'git-main-diff'
         local gitsigns = require 'gitsigns'
 
-        local function map(mode, l, r, opts)
+        local function git_map(mode, key, command, opts)
           opts = opts or {}
           opts.buffer = bufnr
-          vim.keymap.set(mode, l, r, opts)
-        end
-
-        local function git_map(mode, key, command, desc)
-          map(mode, '<leader>g' .. key, command, desc)
+          vim.keymap.set(mode, '<leader>g' .. key, command, opts)
         end
 
         git_map('n', 'hb', gitsigns.blame_line, { desc = 'git blame line' })
-        git_map('n', 'hw', diff_main.worktree, { desc = 'git diff worktree against staged changes' })
-        git_map('n', 'hd', diff_main.index, { desc = 'git diff worktree against default branch' })
-        git_map('n', 'hs', diff_main.quickfix_status, { desc = 'git status quickfix' })
-        git_map('n', 'hq', diff_main.quickfix_worktree, { desc = 'git diff quickfix files against staged changes' })
         git_map('n', 'tb', gitsigns.toggle_current_line_blame, { desc = 'Toggle git show blame line' })
       end,
 
@@ -69,6 +31,46 @@ return {
         delete = { text = '_' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
+      },
+    },
+  },
+
+  { -- VSCode-style review: changed-file explorer beside a side-by-side diff
+    'esmuellert/codediff.nvim',
+    cmd = 'CodeDiff',
+    keys = {
+      { '<leader>ghs', '<cmd>CodeDiff<CR>', desc = 'git review working tree changes' },
+      { '<leader>ghw', '<cmd>CodeDiff file HEAD<CR>', desc = 'git diff file against HEAD' },
+      {
+        '<leader>ghd',
+        function()
+          vim.cmd('CodeDiff file ' .. default_branch() .. '...')
+        end,
+        desc = 'git diff file against default branch',
+      },
+      {
+        '<leader>ghm',
+        function()
+          vim.cmd('CodeDiff ' .. default_branch() .. '...')
+        end,
+        desc = 'git review branch against default branch',
+      },
+      { '<leader>ghl', '<cmd>CodeDiff history %<CR>', desc = 'git history of file' },
+    },
+    opts = {
+      -- Background-only tints tuned for the #0c0c0c Ghostty background, so
+      -- syntax colours stay readable on changed lines.
+      highlights = {
+        line_insert = '#16261b',
+        line_delete = '#2b1619',
+        char_insert = '#24452d',
+        char_delete = '#4d2329',
+      },
+      explorer = {
+        -- Moving through the file list opens each diff, like stepping
+        -- through a quickfix list.
+        auto_open_on_cursor = true,
+        line_stats = { enabled = true, count_untracked = true },
       },
     },
   },
