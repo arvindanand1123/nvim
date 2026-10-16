@@ -1,42 +1,66 @@
--- The integration token and both database IDs live in one 1Password item,
--- named here only by its ID: fields `credential`, `tasks_db` and `notes_db`.
+-- The integration token and both database IDs live in one 1Password item, in
+-- fields `credential`, `tasks_db` and `notes_db`. `:NotionReauth <item id>`
+-- names the item; its ID is kept in nvim's state directory, outside the repo.
 -- 1Password asks for Touch ID if it is locked.
-local item = 'li6figzqkesoe7ewyjond4cdle'
+local item_file = vim.fn.stdpath 'state' .. '/notion-item'
 
-local function op_fields(fields)
-  return { 'op', 'item', 'get', item, '--account', 'my.1password.com', '--fields', fields, '--reveal' }
+local function saved_item()
+  local ok, lines = pcall(vim.fn.readfile, item_file)
+  return ok and lines[1] or nil
 end
 
-local token_cmd = op_fields 'label=credential'
-
--- Database IDs, read from 1Password the first time a command needs them.
+-- Database IDs, read from 1Password along with the token.
 local databases
 
-local function load_databases()
-  local result = vim.system(op_fields 'label=tasks_db,label=notes_db', { text = true }):wait()
-  local task, note = vim.trim(result.stdout or ''):match '^([%w-]+),([%w-]+)$'
-  if result.code ~= 0 or not task then
-    vim.notify('Could not read the Notion database IDs from 1Password: ' .. vim.trim(result.stderr or ''), vim.log.levels.ERROR)
+-- Deferred: the first command runs through lazy.nvim's vim.cmd, which turns an
+-- error message into a Lua error and a stack trace.
+local function fail(message)
+  vim.schedule(function()
+    vim.notify(message, vim.log.levels.ERROR)
+  end)
+end
+
+-- notion.nvim looks the token up from its config on every request, so
+-- replacing it there takes effect immediately.
+local function load(item)
+  item = item or saved_item()
+  if not item then
+    fail 'No 1Password item for Notion yet. Run :NotionReauth <item id>.'
     return false
   end
 
+  local result = vim
+    .system({
+      'op',
+      'item',
+      'get',
+      item,
+      '--account',
+      'my.1password.com',
+      '--fields',
+      'label=credential,label=tasks_db,label=notes_db',
+      '--reveal',
+    }, { text = true })
+    :wait()
+  local token, task, note = vim.trim(result.stdout or ''):match '^([^,]+),([%w-]+),([%w-]+)$'
+  if result.code ~= 0 or not token then
+    fail('Could not read the Notion token and databases from 1Password: ' .. vim.trim(result.stderr or ''))
+    return false
+  end
+
+  require('notion.config').options.notion_token = token
   databases = { task = task, note = note }
   return true
 end
 
--- notion.nvim reads the token once at setup but looks it up from its config
--- on every request, so replacing it there takes effect immediately.
-local function reauth()
-  local result = vim.system(token_cmd, { text = true }):wait()
-  local token = vim.trim(result.stdout or '')
-  if result.code ~= 0 or token == '' then
-    vim.notify('Could not read the Notion token from 1Password: ' .. vim.trim(result.stderr or ''), vim.log.levels.ERROR)
-    return
-  end
-
-  require('notion.config').options.notion_token = token
-  if load_databases() then
-    vim.notify 'Notion token and databases reloaded from 1Password.'
+local function reauth(args)
+  local item = args.args ~= '' and args.args or nil
+  if load(item) then
+    if item then
+      vim.fn.mkdir(vim.fs.dirname(item_file), 'p')
+      vim.fn.writefile({ item }, item_file)
+    end
+    vim.notify 'Notion token and databases loaded from 1Password.'
   end
 end
 
@@ -45,7 +69,7 @@ end
 -- creating or browsing. Both databases must title their pages with a property
 -- called `Name`, and be shared with the integration.
 local function use_database(kind)
-  if not databases and not load_databases() then
+  if not databases and not load() then
     return
   end
 
@@ -115,12 +139,13 @@ return {
       },
     },
     config = function()
-      require('notion').setup {
-        -- Runs once, when a Notion command first loads the plugin.
-        notion_token_cmd = token_cmd,
+      -- Set the options directly rather than through setup(), which warns
+      -- when no token is configured; load() supplies the token on first use.
+      local config = require 'notion.config'
+      config.options = vim.tbl_deep_extend('force', config.defaults, {
         -- fzf-lua handles vim.ui.select.
         use_telescope = false,
-      }
+      })
 
       vim.api.nvim_create_user_command('NotionTask', command 'task', {
         nargs = '*',
@@ -131,7 +156,8 @@ return {
         desc = 'Notion: create a note with the given title, or browse notes',
       })
       vim.api.nvim_create_user_command('NotionReauth', reauth, {
-        desc = 'Notion: reload the token and databases from 1Password',
+        nargs = '?',
+        desc = 'Notion: load the token and databases from a 1Password item (remembered once given)',
       })
     end,
   },
