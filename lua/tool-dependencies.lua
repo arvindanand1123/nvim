@@ -243,6 +243,12 @@ M.tools = {
       format = {},
     },
   },
+  bashls = {
+    config = {
+      langs = { 'sh' },
+      lsp = {},
+    },
+  },
 }
 
 -- Define conditions for loading a particular tool
@@ -426,6 +432,7 @@ function M.get_langs(opts)
       local ft_to_parser = {
         typescriptreact = 'tsx',
         javascriptreact = 'javascript',
+        sh = 'bash',
       }
       local lang = use_pure and ft or (ft_to_parser[ft] or ft)
       langs[lang] = true
