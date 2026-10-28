@@ -249,6 +249,15 @@ M.tools = {
       lsp = {},
     },
   },
+  -- Ships with Xcode; Mason has no package for it. /usr/bin/sourcekit-lsp is the xcrun shim,
+  -- so it follows the toolchain chosen with xcode-select.
+  sourcekit = {
+    path = system 'sourcekit-lsp',
+    config = {
+      langs = { 'swift' },
+      lsp = {},
+    },
+  },
 }
 
 -- Define conditions for loading a particular tool
