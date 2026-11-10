@@ -51,6 +51,10 @@ return {
           { name = 'path' },
         },
       }
+
+      -- pi's prompt buffer has its own completion menu on the same keys
+      -- (lua/plugins/pi-bridge.lua).
+      cmp.setup.filetype('pi-prompt', { enabled = false })
     end,
   },
 }
